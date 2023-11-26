@@ -16,6 +16,8 @@ public class MusicPlayer extends JFrame {
 
     private final List<Path> queue = new ArrayList<>();
 
+    private int lastPlayedIndex = -1;
+
     private final NowPlayingPanel nowPlayingPanel;
     private final LibraryPanel libraryPanel;
     private final SettingsPanel settingsPanel;
@@ -32,6 +34,12 @@ public class MusicPlayer extends JFrame {
         nowPlayingPanel.playPauseButton.addActionListener(e -> playOrPause());
         nowPlayingPanel.previousButton.addActionListener(e -> playPrevious());
         nowPlayingPanel.nextButton.addActionListener(e -> playNext());
+        nowPlayingPanel.progressSlider.addChangeListener(e -> {
+            if (!nowPlayingPanel.progressSlider.getValueIsAdjusting()) return;
+            double value = nowPlayingPanel.progressSlider.getValue();
+            double max = nowPlayingPanel.progressSlider.getMaximum();
+            setPlayTime(value / max);
+        });
         nowPlayingPanel.setPreferredSize(size);
         tabbedPane.addTab("Now Playing", nowPlayingPanel);
 
@@ -91,24 +99,61 @@ public class MusicPlayer extends JFrame {
         nowPlayingPanel.displayQueue(queue);
     }
 
-    private void removeFromQueue(Path path) {
-        queue.remove(path);
+    private void removeFromQueue(int index) {
+        queue.remove(index);
         nowPlayingPanel.displayQueue(queue);
+
+        if (lastPlayedIndex != -1) {
+            if (lastPlayedIndex == index) {
+                lastPlayedIndex = -1;
+            } else if (lastPlayedIndex > index) {
+                lastPlayedIndex--;
+            }
+        }
+        updatePlayStatus();
     }
 
-    private void startPlayback(Path path) {
-        audioManager.startPlayback(path);
+    private void startPlayback(int index) {
+        if (index < 0 || index >= queue.size()) return;
+
+        lastPlayedIndex = index;
+        Path path = queue.get(index);
+        audioManager.startPlayback(path, nowPlayingPanel::setTime, this::updatePlayStatus);
+        updatePlayStatus();
     }
 
     private void playOrPause() {
-
+        audioManager.playOrPause();
+        updatePlayStatus();
     }
 
     private void playPrevious() {
-
+        if (lastPlayedIndex == -1 || lastPlayedIndex == 0) return;
+        startPlayback(lastPlayedIndex - 1);
     }
 
     private void playNext() {
+        if (lastPlayedIndex == -1 || lastPlayedIndex == queue.size() - 1) return;
+        startPlayback(lastPlayedIndex + 1);
+    }
 
+    private void setPlayTime(double fraction) {
+        audioManager.seek(fraction);
+        updatePlayStatus();
+    }
+
+    private void updatePlayStatus() {
+        switch (audioManager.getStatus()) {
+            case PLAYING:
+                if (lastPlayedIndex != -1) {
+                    nowPlayingPanel.play(lastPlayedIndex);
+                }
+                break;
+            case PAUSED:
+            case NONE:
+            case ERROR:
+                nowPlayingPanel.pause();
+                break;
+        }
     }
 }

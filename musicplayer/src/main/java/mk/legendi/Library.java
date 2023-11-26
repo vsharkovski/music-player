@@ -14,8 +14,6 @@ public class Library {
 
     private final String pathKey = "library-path";
 
-    private final List<String> supportedFormats = List.of("wav");
-
     private final Database database;
 
     private Path path = null;
@@ -65,7 +63,7 @@ public class Library {
         SimpleFileVisitor<Path> fileVisitor = new SimpleFileVisitor<>() {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) {
-                boolean isSupported = supportedFormats.stream().anyMatch(
+                boolean isSupported = AudioManager.SUPPORTED_FORMATS.stream().anyMatch(
                         format -> file.getFileName().toString().endsWith("." + format));
                 if (isSupported) {
                     foundFiles.add(file);

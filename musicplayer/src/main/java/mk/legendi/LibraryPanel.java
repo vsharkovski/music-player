@@ -13,6 +13,8 @@ public class LibraryPanel extends JPanel {
     public LibraryPanel(Consumer<Path> onAdd) {
         this.onAdd = onAdd;
 
+        setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+
         libraryScrollPane = new JScrollPane();
         add(libraryScrollPane);
     }
@@ -30,12 +32,14 @@ public class LibraryPanel extends JPanel {
             c.gridy = index;
 
             c.gridx = 0;
+            c.weightx = 9;
             c.fill = GridBagConstraints.HORIZONTAL;
             JLabel trackLabel = new JLabel(trackLabelText);
             panel.add(trackLabel, c);
 
             c.gridx = 1;
-            c.fill = GridBagConstraints.NONE;
+            c.weightx = 0;
+            c.fill = GridBagConstraints.HORIZONTAL;
             JButton addButton = new JButton("+");
             addButton.addActionListener(e -> onAdd.accept(file));
             panel.add(addButton, c);
