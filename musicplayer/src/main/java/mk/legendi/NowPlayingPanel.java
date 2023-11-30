@@ -4,39 +4,43 @@ import javafx.util.Duration;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.font.TextAttribute;
-import java.nio.file.Path;
-import java.util.*;
-import java.util.List;
-import java.util.function.Consumer;
 
 public class NowPlayingPanel extends JPanel {
     private static final String PLAY_ICON = "▶";
     private static final String PAUSE_ICON = "⏸";
 
-    public final JScrollPane queueScrollPane;
-    public final JLabel trackLabel;
-    public final JSlider progressSlider;
+    public final TrackPane trackPane;
+    public final JButton clearTracksButton;
     public final JButton playPauseButton;
     public final JButton previousButton;
     public final JButton nextButton;
+    public final JSlider progressSlider;
 
-    private final Consumer<Integer> onRemove;
-    private final Consumer<Integer> onSelect;
+    private final JLabel trackLabel;
+    private final JLabel timeLabel;
 
-    private List<JLabel> lastQueueLabels = Collections.emptyList();
-    private JLabel lastUnderlinedLabel = null;
+    public NowPlayingPanel() {
+        setLayout(new BorderLayout());
 
-    public NowPlayingPanel(Consumer<Integer> onRemove, Consumer<Integer> onSelect) {
-        this.onRemove = onRemove;
-        this.onSelect = onSelect;
+        JPanel tracksPanel = new JPanel();
+        tracksPanel.setLayout(new BorderLayout());
+        {
+            trackPane = new TrackPane(true, "x");
+            tracksPanel.add(trackPane, BorderLayout.CENTER);
 
-        setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+            JPanel buttonPanel = new JPanel();
+            buttonPanel.setLayout(new BorderLayout());
+            {
+                buttonPanel.add(Box.createHorizontalGlue(), BorderLayout.LINE_START);
 
-        queueScrollPane = new JScrollPane();
-        add(queueScrollPane);
+                clearTracksButton = new JButton("\uD83D\uDDD1️");
+                buttonPanel.add(clearTracksButton, BorderLayout.LINE_END);
+
+                buttonPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+            }
+            tracksPanel.add(buttonPanel, BorderLayout.PAGE_END);
+        }
+        add(tracksPanel, BorderLayout.CENTER);
 
         JPanel controlPanel = new JPanel();
         controlPanel.setLayout(new GridBagLayout());
@@ -44,16 +48,27 @@ public class NowPlayingPanel extends JPanel {
             GridBagConstraints c = new GridBagConstraints();
             c.insets = new Insets(5, 5, 5, 5);
             c.fill = GridBagConstraints.HORIZONTAL;
-            c.weightx = 1;
+            c.weightx = 1.0;
 
             c.gridx = 0;
-            c.gridwidth = 3;
-
             c.gridy = 0;
-            trackLabel = new JLabel();
-            controlPanel.add(trackLabel, c);
+            c.gridwidth = 3;
+            JPanel panel = new JPanel();
+            panel.setLayout(new BorderLayout());
+            {
+                trackLabel = new JLabel();
+                trackLabel.setHorizontalAlignment(SwingConstants.LEFT);
+                panel.add(trackLabel, BorderLayout.CENTER);
 
+                timeLabel = new JLabel();
+                timeLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+                panel.add(timeLabel, BorderLayout.LINE_END);
+            }
+            controlPanel.add(panel, c);
+
+            c.gridx = 0;
             c.gridy = 1;
+            c.gridwidth = 3;
             progressSlider = new JSlider(JSlider.HORIZONTAL, 0, 100, 0);
             controlPanel.add(progressSlider, c);
 
@@ -72,59 +87,13 @@ public class NowPlayingPanel extends JPanel {
             nextButton = new JButton(">>");
             controlPanel.add(nextButton, c);
         }
-        add(controlPanel);
+        add(controlPanel, BorderLayout.SOUTH);
     }
 
-    public void displayQueue(List<Path> queue) {
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridBagLayout());
-
-        GridBagConstraints c = new GridBagConstraints();
-        c.insets = new Insets(5, 5, 5, 5);
-
-        lastQueueLabels = new ArrayList<>();
-
-        for (int index = 0; index < queue.size(); index++) {
-            int finalIndex = index;
-            Path file = queue.get(index);
-            String nameLabelText = String.format("%02d - %s", index + 1, file.getFileName().toString());
-            c.gridy = index;
-
-            c.gridx = 0;
-            c.fill = GridBagConstraints.HORIZONTAL;
-            JLabel nameLabel = new JLabel(nameLabelText);
-            nameLabel.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    onSelect.accept(finalIndex);
-                }
-            });
-            lastQueueLabels.add(nameLabel);
-            panel.add(nameLabel, c);
-
-            c.gridx = 1;
-            c.fill = GridBagConstraints.NONE;
-            JButton removeButton = new JButton("x");
-            removeButton.addActionListener(e -> onRemove.accept(finalIndex));
-            panel.add(removeButton, c);
-        }
-
-        queueScrollPane.setViewportView(panel);
-    }
-
-    public void play(int index) {
+    public void play(Track track, int index) {
         playPauseButton.setText(PAUSE_ICON);
-
-        if (lastUnderlinedLabel != null) {
-            setUnderlined(lastUnderlinedLabel, false);
-        }
-
-        if (index >= 0 && index < lastQueueLabels.size()) {
-            JLabel label = lastQueueLabels.get(index);
-            setUnderlined(label, true);
-            lastUnderlinedLabel = label;
-            trackLabel.setText(label.getText());
-        }
+        trackPane.setUnderlinedLabel(index);
+        trackLabel.setText(track.getName());
     }
 
     public void pause() {
@@ -132,16 +101,19 @@ public class NowPlayingPanel extends JPanel {
     }
 
     public void setTime(Duration currentTime, Duration stopTime) {
-        progressSlider.setMaximum((int) Math.round(stopTime.toSeconds()));
-        progressSlider.setValue((int) Math.round(currentTime.toSeconds()));
+        int currentTimeSeconds = (int) Math.round(currentTime.toSeconds());
+        int stopTimeSeconds = (int) Math.round(stopTime.toSeconds());
+
+        progressSlider.setValue(currentTimeSeconds);
+        progressSlider.setMaximum(stopTimeSeconds);
+
+        String timeText = String.format("%s / %s", formatTime(currentTimeSeconds), formatTime(stopTimeSeconds));
+        timeLabel.setText(timeText);
     }
 
-    private void setUnderlined(JLabel label, boolean underlined) {
-        Font font = label.getFont();
-
-        Map<TextAttribute, Object> attributes = new HashMap<>(font.getAttributes());
-        attributes.put(TextAttribute.UNDERLINE, underlined ? TextAttribute.UNDERLINE_ON : -1);
-
-        label.setFont(font.deriveFont(attributes));
+    private String formatTime(int seconds) {
+        int minutes = seconds / 60;
+        int remainingSeconds = seconds % 60;
+        return String.format("%d:%02d", minutes, remainingSeconds);
     }
 }

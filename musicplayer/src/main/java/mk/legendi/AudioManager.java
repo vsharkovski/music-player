@@ -33,6 +33,7 @@ public class AudioManager {
         if (mediaPlayer != null) {
             // Stop, remove old media player.
             mediaPlayer.dispose();
+            mediaPlayer = null;
         }
 
         try {
@@ -50,10 +51,17 @@ public class AudioManager {
         } catch (Exception exception) {
             System.err.println("Error starting playback of: " + path);
             exception.printStackTrace();
+
+            mediaPlayer = null;
+            status = Status.ERROR;
         }
     }
 
     public void playOrPause() {
+        if (mediaPlayer == null) {
+            return;
+        }
+
         switch (mediaPlayer.getStatus()) {
             case READY:
             case PAUSED:

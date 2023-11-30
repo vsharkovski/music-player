@@ -14,9 +14,10 @@ public class MusicPlayer extends JFrame {
     private final Library library;
     private final AudioManager audioManager;
 
-    private final List<Path> queue = new ArrayList<>();
+    private final List<Track> queue = new ArrayList<>();
 
     private int lastPlayedIndex = -1;
+    private Track lastPlayedTrack = null;
 
     private final NowPlayingPanel nowPlayingPanel;
     private final LibraryPanel libraryPanel;
@@ -30,7 +31,10 @@ public class MusicPlayer extends JFrame {
         JTabbedPane tabbedPane = new JTabbedPane();
         Dimension size = new Dimension(SIZE_W, SIZE_H);
 
-        nowPlayingPanel = new NowPlayingPanel(this::removeFromQueue, this::startPlayback);
+        nowPlayingPanel = new NowPlayingPanel();
+        nowPlayingPanel.trackPane.setOnTrackClick(this::startPlayback);
+        nowPlayingPanel.trackPane.setOnButtonClick(this::removeFromQueue);
+        nowPlayingPanel.clearTracksButton.addActionListener(e -> clearQueue());
         nowPlayingPanel.playPauseButton.addActionListener(e -> playOrPause());
         nowPlayingPanel.previousButton.addActionListener(e -> playPrevious());
         nowPlayingPanel.nextButton.addActionListener(e -> playNext());
@@ -43,7 +47,8 @@ public class MusicPlayer extends JFrame {
         nowPlayingPanel.setPreferredSize(size);
         tabbedPane.addTab("Now Playing", nowPlayingPanel);
 
-        libraryPanel = new LibraryPanel(this::addToQueue);
+        libraryPanel = new LibraryPanel();
+        libraryPanel.trackPane.setOnButtonClick(this::addToQueue);
         libraryPanel.setPreferredSize(size);
         tabbedPane.addTab("Library", libraryPanel);
 
@@ -90,18 +95,20 @@ public class MusicPlayer extends JFrame {
             settingsPanel.libraryLocationField.setText(path.toString());
         }
 
-        List<Path> files = library.getFiles();
-        libraryPanel.displayFiles(files);
+        List<Track> tracks = library.getTracks();
+        libraryPanel.trackPane.setTracks(tracks);
     }
 
-    private void addToQueue(Path path) {
-        queue.add(path);
-        nowPlayingPanel.displayQueue(queue);
+    private void addToQueue(int index) {
+        Track track = library.getTracks().get(index);
+        queue.add(track);
+        nowPlayingPanel.trackPane.setTracks(queue);
+        updatePlayStatus();
     }
 
     private void removeFromQueue(int index) {
         queue.remove(index);
-        nowPlayingPanel.displayQueue(queue);
+        nowPlayingPanel.trackPane.setTracks(queue);
 
         if (lastPlayedIndex != -1) {
             if (lastPlayedIndex == index) {
@@ -110,15 +117,24 @@ public class MusicPlayer extends JFrame {
                 lastPlayedIndex--;
             }
         }
+
+        updatePlayStatus();
+    }
+
+    private void clearQueue() {
+        queue.clear();
+        nowPlayingPanel.trackPane.setTracks(queue);
+        lastPlayedIndex = -1;
         updatePlayStatus();
     }
 
     private void startPlayback(int index) {
         if (index < 0 || index >= queue.size()) return;
 
+        Track track = queue.get(index);
         lastPlayedIndex = index;
-        Path path = queue.get(index);
-        audioManager.startPlayback(path, nowPlayingPanel::setTime, this::updatePlayStatus);
+        lastPlayedTrack = track;
+        audioManager.startPlayback(track.getPath(), nowPlayingPanel::setTime, this::updatePlayStatus);
         updatePlayStatus();
     }
 
@@ -128,12 +144,12 @@ public class MusicPlayer extends JFrame {
     }
 
     private void playPrevious() {
-        if (lastPlayedIndex == -1 || lastPlayedIndex == 0) return;
+        if (lastPlayedTrack == null || lastPlayedIndex == 0) return;
         startPlayback(lastPlayedIndex - 1);
     }
 
     private void playNext() {
-        if (lastPlayedIndex == -1 || lastPlayedIndex == queue.size() - 1) return;
+        if (lastPlayedTrack == null || lastPlayedIndex == queue.size() - 1) return;
         startPlayback(lastPlayedIndex + 1);
     }
 
@@ -145,8 +161,8 @@ public class MusicPlayer extends JFrame {
     private void updatePlayStatus() {
         switch (audioManager.getStatus()) {
             case PLAYING:
-                if (lastPlayedIndex != -1) {
-                    nowPlayingPanel.play(lastPlayedIndex);
+                if (lastPlayedTrack != null) {
+                    nowPlayingPanel.play(lastPlayedTrack, lastPlayedIndex);
                 }
                 break;
             case PAUSED:

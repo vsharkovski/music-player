@@ -18,7 +18,7 @@ public class Library {
 
     private Path path = null;
 
-    private List<Path> files = Collections.emptyList();
+    private List<Track> tracks = Collections.emptyList();
 
     public Library(Database database) {
         this.database = database;
@@ -26,7 +26,7 @@ public class Library {
         String pathString = database.get(pathKey);
         if (pathString != null) {
             this.path = Path.of(pathString);
-            this.files = scanPath();
+            this.tracks = scanPath();
         }
     }
 
@@ -37,28 +37,28 @@ public class Library {
     public void setPath(Path newPath) {
         database.put(pathKey, newPath.toString());
         path = newPath;
-        files = scanPath();
+        tracks = scanPath();
 
         System.out.println("Files after scan:");
-        for (Path file : files) {
-            System.out.println("  " + file.toAbsolutePath());
+        for (Track track : tracks) {
+            System.out.println("  " + track.getPath().toAbsolutePath());
         }
     }
 
     public void removePath() {
         database.put(pathKey, "");
         path = null;
-        files = Collections.emptyList();
+        tracks = Collections.emptyList();
     }
 
-    public List<Path> getFiles() {
-        return files;
+    public List<Track> getTracks() {
+        return tracks;
     }
 
-    private List<Path> scanPath() {
+    private List<Track> scanPath() {
         if (path == null) return Collections.emptyList();
 
-        List<Path> foundFiles = new ArrayList<>();
+        List<Track> foundTracks = new ArrayList<>();
 
         SimpleFileVisitor<Path> fileVisitor = new SimpleFileVisitor<>() {
             @Override
@@ -66,7 +66,7 @@ public class Library {
                 boolean isSupported = AudioManager.SUPPORTED_FORMATS.stream().anyMatch(
                         format -> file.getFileName().toString().endsWith("." + format));
                 if (isSupported) {
-                    foundFiles.add(file);
+                    foundTracks.add(new Track(file));
                 }
                 return FileVisitResult.CONTINUE;
             }
@@ -86,7 +86,7 @@ public class Library {
             exception.printStackTrace();
         }
 
-        return foundFiles;
+        return foundTracks;
     }
 
 }
