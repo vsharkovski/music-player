@@ -194,6 +194,13 @@ public class MusicPlayer extends JFrame {
             case ERROR:
                 nowPlayingPanel.pause();
                 break;
+            case ENDED:
+                if (lastPlayedIndex < queue.size() - 1) {
+                    playNext();
+                } else {
+                    nowPlayingPanel.pause();
+                }
+                break;
         }
     }
 }

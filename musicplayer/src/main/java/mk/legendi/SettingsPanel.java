@@ -41,8 +41,8 @@ public class SettingsPanel extends JPanel {
         clearLibraryButton = new JButton("Clear");
         add(clearLibraryButton, c);
 
-        c.gridx = 2;
-        c.gridy = 2;
+        c.gridx = 0;
+        c.gridy = 3;
         c.gridwidth = 1;
         logoutButton = new JButton("Logout");
         add(logoutButton,c);

@@ -11,7 +11,7 @@ import java.util.function.BiConsumer;
 
 public class AudioManager {
     public enum Status {
-        NONE, PLAYING, PAUSED, ERROR
+        NONE, PLAYING, PAUSED, ENDED, ERROR
     }
 
     public static final List<String> SUPPORTED_FORMATS = List.of("mp3", "wav", "aiff");
@@ -43,7 +43,7 @@ public class AudioManager {
                     timeHandler.accept(duration, mediaPlayer.getStopTime())
             ));
             mediaPlayer.setOnEndOfMedia(() -> {
-                status = Status.PAUSED;
+                status = Status.ENDED;
                 endHandler.run();
             });
             mediaPlayer.play();

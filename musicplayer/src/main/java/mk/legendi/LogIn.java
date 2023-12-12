@@ -1,19 +1,18 @@
 package mk.legendi;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.lang.reflect.Array;
-import java.nio.file.Path;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
 public class LogIn extends JFrame {
     public JFrame frmLogin;
     private JTextField UserName;
     private JTextField Password;
+    private JLabel failLabel;
     ArrayList<User> Accounts = new ArrayList<User>();
 
     public int verify_login()
@@ -31,6 +30,8 @@ public class LogIn extends JFrame {
                 return i;
             }
         }
+
+        failLabel.setText("Invalid username or password! Please try again.");
         return -1;
     }
 
@@ -89,6 +90,8 @@ public class LogIn extends JFrame {
                         @Override
                         public void windowClosing(WindowEvent windowEvent) {
                             database.writeStore(databasePath);
+                            audioManager.pause();
+                            musicPlayer.dispose();
                         }
                     });
                     musicPlayer.settingsPanel.logoutButton.addActionListener(ee -> {
@@ -126,6 +129,10 @@ public class LogIn extends JFrame {
         });
         btnSignup.setBounds(273, 187, 89, 23);
         frmLogin.getContentPane().add(btnSignup);
+
+        failLabel = new JLabel("");
+        failLabel.setBounds(30, 230, 390, 14);
+        frmLogin.getContentPane().add(failLabel);
     }
 
 }

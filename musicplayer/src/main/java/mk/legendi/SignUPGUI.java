@@ -1,8 +1,7 @@
 package mk.legendi;
+
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.*;
-import java.nio.file.Path;
 
 public class SignUPGUI extends JFrame{
     public JFrame frame;
@@ -10,11 +9,12 @@ public class SignUPGUI extends JFrame{
     private JTextField Email;
     private JTextField User;
     private JTextField Password;
+    private JLabel failLabel;
 
     public SignUPGUI()
     {
         frame = new JFrame();
-        frame.setBounds(100, 100, 450, 300);
+        frame.setBounds(100, 100, 450, 380);
         //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         WindowListener Exit = new WindowAdapter() {
@@ -80,6 +80,10 @@ public class SignUPGUI extends JFrame{
         });
         btnNewButton.setBounds(234, 229, 130, 23);
         frame.getContentPane().add(btnNewButton);
+
+        failLabel = new JLabel("");
+        failLabel.setBounds(30, 280, 390, 14);
+        frame.getContentPane().add(failLabel);
     }
 
     public boolean signup()
@@ -88,6 +92,11 @@ public class SignUPGUI extends JFrame{
         String username = User.getText();
         String email = Email.getText();
         String password = Password.getText();
+
+        if (name.isBlank() || username.isBlank() || email.isBlank() || password.isBlank()) {
+            failLabel.setText("Please enter all required information.");
+            return false;
+        }
 
         User newUser = new User(name,username,password,email);
         int present = 0;
@@ -114,7 +123,7 @@ public class SignUPGUI extends JFrame{
             UserList.getInstance().getAccounts().get(in-1).setL(library);*/
         }else
         {
-            System.out.println("User name already in use! Please Try again! \n");
+            failLabel.setText("User name already in use! Please Try again!");
             return false;
         }
 

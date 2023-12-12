@@ -33,7 +33,7 @@ public class NowPlayingPanel extends JPanel {
             {
                 buttonPanel.add(Box.createHorizontalGlue(), BorderLayout.LINE_START);
 
-                clearTracksButton = new JButton("\uD83D\uDDD1️");
+                clearTracksButton = new JButton("Clear️");
                 buttonPanel.add(clearTracksButton, BorderLayout.LINE_END);
 
                 buttonPanel.add(Box.createRigidArea(new Dimension(0, 20)));
