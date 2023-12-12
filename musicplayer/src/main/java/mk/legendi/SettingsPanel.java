@@ -7,6 +7,7 @@ public class SettingsPanel extends JPanel {
     public final JTextField libraryLocationField;
     public final JButton chooseLibraryButton;
     public final JButton clearLibraryButton;
+    public final JButton logoutButton;
 
     public SettingsPanel() {
         setLayout(new GridBagLayout());
@@ -39,5 +40,11 @@ public class SettingsPanel extends JPanel {
         c.gridwidth = 1;
         clearLibraryButton = new JButton("Clear");
         add(clearLibraryButton, c);
+
+        c.gridx = 2;
+        c.gridy = 2;
+        c.gridwidth = 1;
+        logoutButton = new JButton("Logout");
+        add(logoutButton,c);
     }
 }

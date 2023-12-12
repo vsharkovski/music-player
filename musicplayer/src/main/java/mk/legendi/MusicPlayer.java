@@ -2,6 +2,9 @@ package mk.legendi;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -21,7 +24,7 @@ public class MusicPlayer extends JFrame {
 
     private final NowPlayingPanel nowPlayingPanel;
     private final LibraryPanel libraryPanel;
-    private final SettingsPanel settingsPanel;
+    public final SettingsPanel settingsPanel;
 
     public MusicPlayer(Library library, AudioManager audioManager) {
         this.library = library;
@@ -64,6 +67,15 @@ public class MusicPlayer extends JFrame {
             this.library.removePath();
             displayLibrary();
         });
+        /*
+        settingsPanel.logoutButton.addActionListener(e -> {
+            playOrPause();
+            this.dispose();
+            LogIn logIn = new LogIn();
+            logIn.frmLogin.setVisible(true);
+        });*/
+
+
         settingsPanel.setPreferredSize(size);
         tabbedPane.addTab("Settings", settingsPanel);
 
@@ -71,6 +83,18 @@ public class MusicPlayer extends JFrame {
         add(mainPanel);
 
         displayLibrary();
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        WindowListener Exit = new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                //JFrame.dispose();
+                LogIn login = new LogIn();
+                login.frmLogin.setVisible(true);
+                dispose();
+                //super.windowClosing(e);
+            }
+        };
+        this.addWindowListener(Exit);
     }
 
     private Path chooseLibraryPath() {
@@ -138,7 +162,7 @@ public class MusicPlayer extends JFrame {
         updatePlayStatus();
     }
 
-    private void playOrPause() {
+    public void playOrPause() {
         audioManager.playOrPause();
         updatePlayStatus();
     }

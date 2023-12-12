@@ -78,7 +78,17 @@ public class AudioManager {
                 break;
         }
     }
-
+    public void pause()
+    {
+        if (mediaPlayer == null) {
+            return;
+        }
+        if(mediaPlayer.getStatus()==MediaPlayer.Status.PLAYING)
+        {
+            mediaPlayer.pause();
+            status = Status.PAUSED;
+        }
+    }
     public void seek(double durationFraction) {
         if (mediaPlayer == null) return;
 

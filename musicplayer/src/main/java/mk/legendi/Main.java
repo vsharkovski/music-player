@@ -7,8 +7,11 @@ import java.nio.file.Path;
 
 public class Main {
     public static void main(String[] args) {
-        Path databasePath = Path.of("database.db");
-
+        Path path = Path.of("accounts_list.db");
+        boolean loaded = UserList.getInstance().loadUsers(path);
+        LogIn login = new LogIn();
+        login.frmLogin.setVisible(true);
+        /*
         Database database = new Database();
         database.loadStore(databasePath);
 
@@ -26,6 +29,6 @@ public class Main {
             public void windowClosing(WindowEvent windowEvent) {
                 database.writeStore(databasePath);
             }
-        });
+        });*/
     }
 }

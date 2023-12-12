@@ -6,8 +6,8 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Database {
-
+public class Database implements Serializable {
+    private static final long serialVersionUID = -6470090944414208498L;
     private Map<String, String> store;
 
     public Database() {
