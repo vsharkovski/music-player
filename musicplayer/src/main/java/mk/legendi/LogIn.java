@@ -6,27 +6,22 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.nio.file.Path;
-import java.util.ArrayList;
 
 public class LogIn extends JFrame {
     public JFrame frmLogin;
-    private JTextField UserName;
-    private JTextField Password;
-    private JLabel failLabel;
-    ArrayList<User> Accounts = new ArrayList<User>();
+    private final JTextField username;
+    private final JTextField password;
+    private final JLabel failLabel;
 
-    public int verify_login()
-    {
-        String username = UserName.getText();
-        String password = Password.getText();
+    public int verify_login() {
+        String username = this.username.getText();
+        String password = this.password.getText();
 
         System.out.println(username);
         System.out.println(password);
-        int present = 0;
 
-        for(int i=0;i<UserList.getInstance().getAccounts().size();i++)
-        {
-            if(UserList.getInstance().getAccounts().get(i).getUsername().equals(username) && UserList.getInstance().getAccounts().get(i).getPassword().equals(password)) {
+        for (int i = 0; i < UserList.getInstance().getAccounts().size(); i++) {
+            if (UserList.getInstance().getAccounts().get(i).getUsername().equals(username) && UserList.getInstance().getAccounts().get(i).getPassword().equals(password)) {
                 return i;
             }
         }
@@ -35,8 +30,7 @@ public class LogIn extends JFrame {
         return -1;
     }
 
-    public LogIn()
-    {
+    public LogIn() {
         frmLogin = new JFrame();
         frmLogin.setBounds(100, 100, 450, 300);
         frmLogin.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -51,33 +45,26 @@ public class LogIn extends JFrame {
         lblNewLabel_1.setBounds(29, 106, 76, 14);
         frmLogin.getContentPane().add(lblNewLabel_1);
 
-        UserName = new JTextField();
-        UserName.setBounds(115, 41, 217, 20);
-        frmLogin.getContentPane().add(UserName);
-        UserName.setColumns(10);
+        username = new JTextField();
+        username.setBounds(115, 41, 217, 20);
+        frmLogin.getContentPane().add(username);
+        username.setColumns(10);
 
-        Password = new JTextField();
-        Password.setBounds(115, 103, 217, 20);
-        frmLogin.getContentPane().add(Password);
-        Password.setColumns(10);
+        password = new JTextField();
+        password.setBounds(115, 103, 217, 20);
+        frmLogin.getContentPane().add(password);
+        password.setColumns(10);
 
         JButton btnLogin = new JButton("Login");
         btnLogin.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                int ver=verify_login();
-                if(ver!=-1) {
-                    //Path databasePath = Path.of("database.db");
-                    //Database database = new Database();
-                    //database.loadStore(databasePath);
-
-                    //Library library = new Library(database);
-                    String pth="database_"+ Integer.toString(ver+1)+".db";
+                int ver = verify_login();
+                if (ver != -1) {
+                    String pth = "database_" + (ver + 1) + ".db";
                     Path databasePath = Path.of(pth);
                     Database database = new Database();
                     database.loadStore(databasePath);
-                    Library library = new Library(database,UserList.getInstance().getAccounts().get(ver).getUsername());
-                    //Library library = new Library(database,UserList.getInstance().getAccounts().get(ver).getUsername());
-                    //Path databasePath=Path.of("database"+ Integer.toString(ver+1)+".db");
+                    Library library = new Library(database, UserList.getInstance().getAccounts().get(ver).getUsername());
                     AudioManager audioManager = new AudioManager();
 
                     MusicPlayer musicPlayer = new MusicPlayer(library, audioManager);
@@ -102,16 +89,15 @@ public class LogIn extends JFrame {
                         logIn.frmLogin.setVisible(true);
                     });
                     frmLogin.dispose();
-                }else
-                {
-                    System.out.println("Invalid Login! Please Try Again!\n");
+                } else {
+                    failLabel.setText("Invalid username or password! Please try again.");
                 }
             }
         });
         frmLogin.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                UserList.getInstance().StoreUsers();
+                UserList.getInstance().writeUsers();
                 frmLogin.dispose();
                 System.exit(0);
             }
@@ -120,12 +106,10 @@ public class LogIn extends JFrame {
         frmLogin.getContentPane().add(btnLogin);
 
         JButton btnSignup = new JButton("Sign Up");
-        btnSignup.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                SignUPGUI SignUp = new SignUPGUI();
-                SignUp.frame.setVisible(true);
-                frmLogin.dispose();
-            }
+        btnSignup.addActionListener(e -> {
+            SignUPGUI SignUp = new SignUPGUI();
+            SignUp.frame.setVisible(true);
+            frmLogin.dispose();
         });
         btnSignup.setBounds(273, 187, 89, 23);
         frmLogin.getContentPane().add(btnSignup);

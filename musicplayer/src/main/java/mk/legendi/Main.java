@@ -4,8 +4,9 @@ import java.nio.file.Path;
 
 public class Main {
     public static void main(String[] args) {
-        Path path = Path.of("accounts_list.db");
-        boolean loaded = UserList.getInstance().loadUsers(path);
+        Path usersPath = Path.of("accounts_list.db");
+        UserList.getInstance().loadUsers(usersPath);
+
         LogIn login = new LogIn();
         login.frmLogin.setVisible(true);
     }

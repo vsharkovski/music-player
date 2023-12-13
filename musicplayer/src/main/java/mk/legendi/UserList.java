@@ -11,34 +11,29 @@ import java.util.ArrayList;
 public class UserList {
     private static UserList userlist;
     private final Path path = Path.of("accounts_list.db");
-    ArrayList<User> Accounts;
+    ArrayList<User> accounts;
 
-    public static UserList getInstance()
-    {
-        if(userlist == null)
-        {
+    public static UserList getInstance() {
+        if (userlist == null) {
             userlist = new UserList();
         }
         return UserList.userlist;
     }
 
-    private UserList()
-    {
-        Accounts = new ArrayList<User>();
+    private UserList() {
+        accounts = new ArrayList<>();
     }
 
-    public ArrayList<User> getAccounts()
-    {
-        return Accounts;
+    public ArrayList<User> getAccounts() {
+        return accounts;
     }
 
-    public boolean StoreUsers()
-    {
+    public boolean writeUsers() {
         System.out.println("Attempting to write store to: " + path.toAbsolutePath());
 
         try (OutputStream outputStream = Files.newOutputStream(path)) {
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
-            objectOutputStream.writeObject(Accounts);
+            objectOutputStream.writeObject(accounts);
             objectOutputStream.flush();
             System.out.println("Wrote store successfully");
             return true;
@@ -60,7 +55,7 @@ public class UserList {
         try (InputStream inputStream = Files.newInputStream(path)) {
             ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
             Object object = objectInputStream.readObject();
-            Accounts = (ArrayList<User>) object;
+            accounts = (ArrayList<User>) object;
             System.out.println("Loaded store successfully");
             return true;
         } catch (Exception exception) {

@@ -1,29 +1,29 @@
 package mk.legendi;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class User implements Serializable {
+    @Serial
     private static final long serialVersionUID = -6470090944414208496L;
     public static int accounts = 0;
-    private String Name;
-    private String Username;
-    private String Password;
-    private String Email;
-    private int ID;
-    //private Library l;
-    public User(String Name,String Username, String Password,String Email)
-    {
-        this.Name = Name;
-        this.Username = Username;
-        this.Password = Password;
-        this.Email = Email;
+    private final String name;
+    private final String username;
+    private final String password;
+    private final String email;
+    private final int id;
+
+    public User(String name, String username, String password, String email) {
+        this.name = name;
+        this.username = username;
+        this.password = password;
+        this.email = email;
         accounts++;
-        this.ID = accounts;
+        this.id = accounts;
     }
 
-    public String getName()
-    {
-        return Name;
+    public String getName() {
+        return name;
     }
 
     public static int getAccounts() {
@@ -31,27 +31,19 @@ public class User implements Serializable {
     }
 
     public String getEmail() {
-        return Email;
+        return email;
     }
 
-    public int getID() {
-        return ID;
+    public int getId() {
+        return id;
     }
 
     public String getUsername() {
-        return Username;
+        return username;
     }
 
     public String getPassword() {
-        return Password;
+        return password;
     }
-    /*
-    public Library getL() {
-        return l;
-    }
-
-    public void setL(Library l) {
-        this.l = l;
-    }*/
 }
 

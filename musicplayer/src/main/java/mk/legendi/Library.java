@@ -1,6 +1,7 @@
 package mk.legendi;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -12,10 +13,12 @@ import java.util.Collections;
 import java.util.List;
 
 public class Library implements Serializable {
+    @Serial
     private static final long serialVersionUID = -6470090944414208497L;
-    private  String pathKey = "library-path";
 
     private final Database database;
+
+    private String pathKey = "library-path";
 
     private Path path = null;
 
@@ -30,18 +33,16 @@ public class Library implements Serializable {
             this.tracks = scanPath();
         }
     }
-    public Library(Database database,String pth) {
+
+    public Library(Database database, String path) {
         this.database = database;
-        pathKey=pth;
+        pathKey = path;
+
         String pathString = database.get(pathKey);
         if (pathString != null) {
             this.path = Path.of(pathString);
             this.tracks = scanPath();
         }
-    }
-    public Database getDatabase()
-    {
-        return database;
     }
 
     public Path getPath() {
