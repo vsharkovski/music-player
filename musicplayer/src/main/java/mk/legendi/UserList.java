@@ -64,4 +64,9 @@ public class UserList {
             return false;
         }
     }
+
+    public void add(User us)
+    {
+        accounts.add(us);
+    }
 }

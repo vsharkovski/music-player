@@ -101,12 +101,13 @@ public class SignUPGUI extends JFrame {
             }
         }
         if (present == 0) {
-            UserList.getInstance().getAccounts().add(newUser);
+            UserList.getInstance().add(newUser);
             return true;
         } else {
             failLabel.setText("User name already in use! Please Try again!");
             return false;
         }
-
     }
+
+
 }
